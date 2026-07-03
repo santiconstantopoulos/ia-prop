@@ -18,6 +18,7 @@ import { FormField } from './form-field'
 import { ResultPanel, GrantState } from './result-panel'
 import { PortfolioView } from './portfolio-view'
 import { LoanTrackingView } from './loan-tracking-view'
+import { ModelVersionsView } from './model-versions-view'
 import './credit-scoring-engine.css'
 
 function buildInitialState(): ApplicantState {
@@ -27,7 +28,7 @@ function buildInitialState(): ApplicantState {
   return state
 }
 
-type Tab = 'individual' | 'cartera' | 'seguimiento'
+type Tab = 'individual' | 'cartera' | 'seguimiento' | 'modelo'
 
 export function CreditScoringEngine() {
   const [tab, setTab] = useState<Tab>('individual')
@@ -35,7 +36,7 @@ export function CreditScoringEngine() {
   const [model, setModel] = useState<ScoringModel>(DATA)
   const [modelMeta, setModelMeta] = useState<ActiveModelResponse['meta'] | null>(null)
 
-  useEffect(() => {
+  const loadActiveModel = () => {
     fetch('/api/model/active')
       .then((r) => r.json())
       .then((data: ActiveModelResponse) => {
@@ -45,7 +46,9 @@ export function CreditScoringEngine() {
       .catch(() => {
         // Sin conexion o error de red: seguimos usando DATA (ya seteado como default).
       })
-  }, [])
+  }
+
+  useEffect(loadActiveModel, [])
 
   const [grantState, setGrantState] = useState<GrantState>('idle')
   const [grantError, setGrantError] = useState<string>()
@@ -125,6 +128,12 @@ export function CreditScoringEngine() {
         >
           Seguimiento
         </button>
+        <button
+          className={`csm-tab-btn ${tab === 'modelo' ? 'csm-active' : ''}`}
+          onClick={() => setTab('modelo')}
+        >
+          Modelo
+        </button>
       </div>
 
       {tab === 'individual' && (
@@ -175,6 +184,8 @@ export function CreditScoringEngine() {
       {tab === 'cartera' && <PortfolioView model={model} />}
 
       {tab === 'seguimiento' && <LoanTrackingView />}
+
+      {tab === 'modelo' && <ModelVersionsView onRetrained={loadActiveModel} />}
     </div>
   )
 }

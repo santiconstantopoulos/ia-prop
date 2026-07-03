@@ -15,6 +15,12 @@ interface ResultPanelProps {
   grantError?: string
 }
 
+function impactClass(points: number, maxAbs: number): string {
+  const intensity = Math.abs(points) / Math.max(maxAbs, 1)
+  const band = intensity >= 0.75 ? 'strong' : intensity >= 0.45 ? 'medium' : 'soft'
+  return `csm-impact-${points >= 0 ? 'pos' : 'neg'}-${band}`
+}
+
 export function ResultPanel({
   score,
   proba,
@@ -59,18 +65,19 @@ export function ResultPanel({
         <div>
           {top.map((c) => {
             const isPos = c.pts >= 0
+            const impact = impactClass(c.pts, maxAbs)
             return (
               <div className="csm-factor-row" key={c.label}>
                 <div className="csm-factor-label">
                   <span className="csm-fname">{c.label}</span>
-                  <span className={`csm-fpts ${isPos ? 'csm-pos-text' : 'csm-neg-text'}`}>
+                  <span className={`csm-fpts ${impact}`}>
                     {isPos ? '+' : ''}
                     {c.pts.toFixed(1)} pts
                   </span>
                 </div>
                 <div className="csm-factor-bar-bg">
                   <div
-                    className={`csm-factor-bar-fill ${isPos ? 'csm-pos' : 'csm-neg'}`}
+                    className={`csm-factor-bar-fill ${impact}`}
                     style={{ width: `${((Math.abs(c.pts) / maxAbs) * 100).toFixed(0)}%` }}
                   />
                 </div>

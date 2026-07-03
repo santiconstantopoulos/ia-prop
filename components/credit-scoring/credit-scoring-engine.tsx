@@ -6,6 +6,7 @@ import {
   CAT_LABELS,
   COL_LABELS,
   DATA,
+  getOrderedCategoryOptions,
   NUM_CONFIG,
   Preset,
   PRESETS,
@@ -23,7 +24,7 @@ import './credit-scoring-engine.css'
 
 function buildInitialState(): ApplicantState {
   const state: ApplicantState = {}
-  DATA.cat_cols.forEach((c) => (state[c] = DATA.cat_categories[c][0]))
+  DATA.cat_cols.forEach((c) => (state[c] = getOrderedCategoryOptions(c)[0]))
   DATA.num_cols.forEach((c) => (state[c] = NUM_CONFIG[c].def))
   return state
 }
@@ -88,24 +89,21 @@ export function CreditScoringEngine() {
   }
 
   const aucLabel = modelMeta?.auc != null ? modelMeta.auc.toFixed(3) : '0.771'
-  const samplesLabel = modelMeta?.n_training_samples != null
-    ? modelMeta.n_training_samples.toLocaleString('es-AR')
-    : '1.000'
 
   return (
     <div className="csm-root">
       <div className="csm-topbar">
         <div className="csm-brand">
-          <div className="csm-brand-mark">BC</div>
+          <div className="csm-brand-mark">
+            <img className="csm-brand-logo" src="/logo-uade.png" alt="UADE" />
+          </div>
           <div className="csm-brand-text">
-            <div className="csm-eyebrow">Banco Continental — Área de Créditos</div>
+            <div className="csm-eyebrow">Área de Créditos</div>
             <h1>Motor de Scoring Crediticio</h1>
           </div>
         </div>
         <div className="csm-topbar-meta">
           MODELO: REGRESIÓN LOGÍSTICA · AUC {aucLabel}
-          <br />
-          ENTRENADO SOBRE {samplesLabel} SOLICITUDES HISTÓRICAS
         </div>
       </div>
 

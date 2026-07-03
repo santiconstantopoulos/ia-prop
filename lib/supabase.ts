@@ -4,8 +4,8 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js'
 // completos y NUNCA debe exponerse al cliente. Por eso este módulo solo se importa
 // desde Route Handlers (app/api/**), nunca desde componentes con "use client".
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const secretKey = process.env.SUPABASE_SECRET_KEY
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL
+const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY
 
 /** True si las variables de entorno de Supabase están configuradas. */
 export function isSupabaseConfigured(): boolean {

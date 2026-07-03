@@ -17,6 +17,7 @@ import type { ActiveModelResponse } from '@/app/api/model/active/route'
 import { FormField } from './form-field'
 import { ResultPanel, GrantState } from './result-panel'
 import { PortfolioView } from './portfolio-view'
+import { LoanTrackingView } from './loan-tracking-view'
 import './credit-scoring-engine.css'
 
 function buildInitialState(): ApplicantState {
@@ -26,7 +27,7 @@ function buildInitialState(): ApplicantState {
   return state
 }
 
-type Tab = 'individual' | 'cartera'
+type Tab = 'individual' | 'cartera' | 'seguimiento'
 
 export function CreditScoringEngine() {
   const [tab, setTab] = useState<Tab>('individual')
@@ -118,6 +119,12 @@ export function CreditScoringEngine() {
         >
           Modo cartera (lote)
         </button>
+        <button
+          className={`csm-tab-btn ${tab === 'seguimiento' ? 'csm-active' : ''}`}
+          onClick={() => setTab('seguimiento')}
+        >
+          Seguimiento
+        </button>
       </div>
 
       {tab === 'individual' && (
@@ -166,6 +173,8 @@ export function CreditScoringEngine() {
       )}
 
       {tab === 'cartera' && <PortfolioView model={model} />}
+
+      {tab === 'seguimiento' && <LoanTrackingView />}
     </div>
   )
 }

@@ -1,0 +1,3 @@
+# Dependencias para scripts/prepare_seed.py (uso one-off, no forma parte del runtime de la app).
+pandas
+scikit-learn

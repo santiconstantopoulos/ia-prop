@@ -85,7 +85,7 @@ export function ModelVersionsView({ onRetrained }: ModelVersionsViewProps) {
           <h2>
             <span className="csm-section-num">RESULT</span> Resultado de la recalibración
           </h2>
-          <div className="csm-summary-row" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+          <div className="csm-summary-row csm-cols-3">
             <div className="csm-summary-stat">
               <div className="csm-slabel">AUC anterior</div>
               <div className="csm-sval">

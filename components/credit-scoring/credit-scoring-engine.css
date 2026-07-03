@@ -463,6 +463,9 @@
   gap: 16px;
   margin-bottom: 20px;
 }
+.csm-summary-row.csm-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
 @media (max-width: 760px) {
   .csm-summary-row {
     grid-template-columns: 1fr 1fr;

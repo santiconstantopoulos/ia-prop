@@ -15,7 +15,7 @@ import {
 import { computeScore, decisionOf } from '@/lib/credit-scoring/engine'
 import type { ActiveModelResponse } from '@/app/api/model/active/route'
 import { FormField } from './form-field'
-import { ResultPanel } from './result-panel'
+import { ResultPanel, GrantState } from './result-panel'
 import { PortfolioView } from './portfolio-view'
 import './credit-scoring-engine.css'
 
@@ -46,12 +46,17 @@ export function CreditScoringEngine() {
       })
   }, [])
 
+  const [grantState, setGrantState] = useState<GrantState>('idle')
+  const [grantError, setGrantError] = useState<string>()
+
   const handleChange = (field: string, value: string | number) => {
     setState((prev) => ({ ...prev, [field]: value }))
+    setGrantState('idle')
   }
 
   const applyPreset = (preset: Preset) => {
     setState((prev) => ({ ...prev, ...preset.data }))
+    setGrantState('idle')
   }
 
   const { score, proba, contributions } = useMemo(
@@ -59,6 +64,24 @@ export function CreditScoringEngine() {
     [model, state],
   )
   const decision = decisionOf(score)
+
+  const handleGrant = async () => {
+    setGrantState('loading')
+    setGrantError(undefined)
+    try {
+      const res = await fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ features: state, score, probability: proba, decision }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error al otorgar el crédito.')
+      setGrantState('success')
+    } catch (e) {
+      setGrantState('error')
+      setGrantError(e instanceof Error ? e.message : 'Error al otorgar el crédito.')
+    }
+  }
 
   const aucLabel = modelMeta?.auc != null ? modelMeta.auc.toFixed(3) : '0.771'
   const samplesLabel = modelMeta?.n_training_samples != null
@@ -130,7 +153,15 @@ export function CreditScoringEngine() {
             ))}
           </div>
 
-          <ResultPanel score={score} proba={proba} decision={decision} contributions={contributions} />
+          <ResultPanel
+            score={score}
+            proba={proba}
+            decision={decision}
+            contributions={contributions}
+            onGrant={handleGrant}
+            grantState={grantState}
+            grantError={grantError}
+          />
         </div>
       )}
 

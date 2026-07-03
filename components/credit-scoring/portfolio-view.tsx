@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CAT_LABELS, formatARS, PORTFOLIO, PortfolioApplicant } from '@/lib/credit-scoring/data'
+import { CAT_LABELS, formatARS, PORTFOLIO, PortfolioApplicant, ScoringModel } from '@/lib/credit-scoring/data'
 import { computeScoreFor, decisionOf, Decision, DECISION_LABEL } from '@/lib/credit-scoring/engine'
 
 interface ResultRow {
@@ -13,9 +13,9 @@ interface ResultRow {
   matches: boolean
 }
 
-function evaluatePortfolio(): ResultRow[] {
+function evaluatePortfolio(model: ScoringModel): ResultRow[] {
   const results = PORTFOLIO.map((rec) => {
-    const { score, proba } = computeScoreFor(rec)
+    const { score, proba } = computeScoreFor(model, rec)
     const decision = decisionOf(score)
     const actualLabel = rec.actual === 1 ? 'Buen pagador' : 'Default'
     const matches = (decision === 'rechazar' && rec.actual === 0) || (decision !== 'rechazar' && rec.actual === 1)
@@ -25,7 +25,11 @@ function evaluatePortfolio(): ResultRow[] {
   return results
 }
 
-export function PortfolioView() {
+interface PortfolioViewProps {
+  model: ScoringModel
+}
+
+export function PortfolioView({ model }: PortfolioViewProps) {
   const [results, setResults] = useState<ResultRow[] | null>(null)
 
   const counts = { aprobar: 0, revisar: 0, rechazar: 0 }
@@ -42,7 +46,7 @@ export function PortfolioView() {
           resultado histórico conocido. Simula la cola de solicitudes que el área de créditos procesaría
           en un día.
         </p>
-        <button className="csm-load-btn" onClick={() => setResults(evaluatePortfolio())}>
+        <button className="csm-load-btn" onClick={() => setResults(evaluatePortfolio(model))}>
           Cargar cartera de ejemplo (20 solicitudes)
         </button>
       </div>

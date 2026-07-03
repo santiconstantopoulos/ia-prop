@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ApplicantState,
   CAT_LABELS,
@@ -9,9 +9,11 @@ import {
   NUM_CONFIG,
   Preset,
   PRESETS,
+  ScoringModel,
   SECTIONS,
 } from '@/lib/credit-scoring/data'
 import { computeScore, decisionOf } from '@/lib/credit-scoring/engine'
+import type { ActiveModelResponse } from '@/app/api/model/active/route'
 import { FormField } from './form-field'
 import { ResultPanel } from './result-panel'
 import { PortfolioView } from './portfolio-view'
@@ -29,6 +31,20 @@ type Tab = 'individual' | 'cartera'
 export function CreditScoringEngine() {
   const [tab, setTab] = useState<Tab>('individual')
   const [state, setState] = useState<ApplicantState>(buildInitialState)
+  const [model, setModel] = useState<ScoringModel>(DATA)
+  const [modelMeta, setModelMeta] = useState<ActiveModelResponse['meta'] | null>(null)
+
+  useEffect(() => {
+    fetch('/api/model/active')
+      .then((r) => r.json())
+      .then((data: ActiveModelResponse) => {
+        setModel(data.model)
+        setModelMeta(data.meta)
+      })
+      .catch(() => {
+        // Sin conexion o error de red: seguimos usando DATA (ya seteado como default).
+      })
+  }, [])
 
   const handleChange = (field: string, value: string | number) => {
     setState((prev) => ({ ...prev, [field]: value }))
@@ -39,10 +55,15 @@ export function CreditScoringEngine() {
   }
 
   const { score, proba, contributions } = useMemo(
-    () => computeScore(state, COL_LABELS, CAT_LABELS, NUM_CONFIG),
-    [state],
+    () => computeScore(model, state, COL_LABELS, CAT_LABELS, NUM_CONFIG),
+    [model, state],
   )
   const decision = decisionOf(score)
+
+  const aucLabel = modelMeta?.auc != null ? modelMeta.auc.toFixed(3) : '0.771'
+  const samplesLabel = modelMeta?.n_training_samples != null
+    ? modelMeta.n_training_samples.toLocaleString('es-AR')
+    : '1.000'
 
   return (
     <div className="csm-root">
@@ -55,9 +76,9 @@ export function CreditScoringEngine() {
           </div>
         </div>
         <div className="csm-topbar-meta">
-          MODELO: REGRESIÓN LOGÍSTICA · AUC 0.771
+          MODELO: REGRESIÓN LOGÍSTICA · AUC {aucLabel}
           <br />
-          ENTRENADO SOBRE 1.000 SOLICITUDES HISTÓRICAS
+          ENTRENADO SOBRE {samplesLabel} SOLICITUDES HISTÓRICAS
         </div>
       </div>
 
@@ -113,7 +134,7 @@ export function CreditScoringEngine() {
         </div>
       )}
 
-      {tab === 'cartera' && <PortfolioView />}
+      {tab === 'cartera' && <PortfolioView model={model} />}
     </div>
   )
 }

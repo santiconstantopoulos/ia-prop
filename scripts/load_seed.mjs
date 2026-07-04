@@ -10,9 +10,13 @@ if (!file) {
 }
 
 const rows = JSON.parse(readFileSync(file, 'utf8'))
-const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, {
-  auth: { persistSession: false },
-})
+const sb = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY,
+  {
+    auth: { persistSession: false },
+  },
+)
 
 // Reset: dejamos la tabla en un estado conocido antes de cargar (idempotente si se corre de nuevo).
 const { error: delErr } = await sb.from('seed_training_data').delete().gte('id', 0)

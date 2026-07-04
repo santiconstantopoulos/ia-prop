@@ -88,8 +88,6 @@ export function CreditScoringEngine() {
     }
   }
 
-  const aucLabel = modelMeta?.auc != null ? modelMeta.auc.toFixed(3) : '0.771'
-
   return (
     <div className="csm-root">
       <div className="csm-topbar">
@@ -101,9 +99,6 @@ export function CreditScoringEngine() {
             <div className="csm-eyebrow">Área de Créditos</div>
             <h1>Motor de Scoring Crediticio</h1>
           </div>
-        </div>
-        <div className="csm-topbar-meta">
-          MODELO: REGRESIÓN LOGÍSTICA · AUC {aucLabel}
         </div>
       </div>
 

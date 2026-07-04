@@ -1,6 +1,13 @@
 'use client'
 
-import { ApplicantState, CAT_LABELS, COL_LABELS, DATA, NUM_CONFIG } from '@/lib/credit-scoring/data'
+import {
+  ApplicantState,
+  CAT_LABELS,
+  COL_LABELS,
+  DATA,
+  getOrderedCategoryOptions,
+  NUM_CONFIG,
+} from '@/lib/credit-scoring/data'
 
 interface FormFieldProps {
   fieldName: string
@@ -20,7 +27,7 @@ export function FormField({ fieldName, state, onChange }: FormFieldProps) {
           value={String(state[fieldName])}
           onChange={(e) => onChange(fieldName, e.target.value)}
         >
-          {DATA.cat_categories[fieldName].map((cat) => (
+          {getOrderedCategoryOptions(fieldName).map((cat) => (
             <option key={cat} value={cat}>
               {CAT_LABELS[fieldName]?.[cat] ?? cat}
             </option>

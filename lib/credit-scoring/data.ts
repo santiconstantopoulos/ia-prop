@@ -267,9 +267,9 @@ export const COL_LABELS: Record<string, string> = {
 export const CAT_LABELS: Record<string, Record<string, string>> = {
   status: {
     'no checking account': 'Sin cuenta corriente',
-    '... < 100 DM': 'Cuenta corriente < $65.000',
-    '0 <= ... < 200 DM': 'Cuenta corriente entre $0 y $130.000',
-    '... >= 200 DM / salary for at least 1 year': 'Cuenta ≥ $130.000 o nómina domiciliada',
+    '... < 100 DM': 'Cuenta corriente hasta $65.000',
+    '0 <= ... < 200 DM': 'Cuenta corriente $65.000 a $130.000',
+    '... >= 200 DM / salary for at least 1 year': 'Cuenta corriente $130.000 o más / nómina',
   },
   credit_history: {
     'no credits taken/all credits paid back duly': 'Sin créditos previos / todos pagados',
@@ -339,6 +339,63 @@ export const CAT_LABELS: Record<string, Record<string, string>> = {
   },
   telephone: { yes: 'Sí', no: 'No' },
   foreign_worker: { yes: 'Sí', no: 'No' },
+}
+
+const CATEGORY_OPTION_ORDER: Record<string, string[]> = {
+  status: [
+    '... < 100 DM',
+    '0 <= ... < 200 DM',
+    '... >= 200 DM / salary for at least 1 year',
+    'no checking account',
+  ],
+  savings: [
+    '... < 100 DM',
+    '100 <= ... < 500 DM',
+    '500 <= ... < 1000 DM',
+    '... >= 1000 DM',
+    'unknown/no savings account',
+  ],
+  employment_duration: ['unemployed', '... < 1 year', '1 <= ... < 4 years', '4 <= ... < 7 years', '... >= 7 years'],
+  credit_history: [
+    'no credits taken/all credits paid back duly',
+    'all credits at this bank paid back duly',
+    'existing credits paid back duly till now',
+    'delay in paying off in the past',
+    'critical account/other credits existing',
+  ],
+  other_debtors: ['none', 'co-applicant', 'guarantor'],
+  property: [
+    'unknown/no property',
+    'car or other',
+    'building society savings agreement/life insurance',
+    'real estate',
+  ],
+  other_installment_plans: ['none', 'stores', 'bank'],
+  housing: ['own', 'rent', 'for free'],
+  job: [
+    'unemployed/unskilled - non-resident',
+    'unskilled - resident',
+    'skilled employee/official',
+    'management/self-employed/highly qualified employee/officer',
+  ],
+  telephone: ['no', 'yes'],
+  foreign_worker: ['no', 'yes'],
+}
+
+export function getOrderedCategoryOptions(fieldName: string): string[] {
+  const categories = DATA.cat_categories[fieldName] ?? []
+  const preferredOrder = CATEGORY_OPTION_ORDER[fieldName]
+  if (!preferredOrder) {
+    return [...categories].sort((a, b) => {
+      const labelA = CAT_LABELS[fieldName]?.[a] ?? a
+      const labelB = CAT_LABELS[fieldName]?.[b] ?? b
+      return labelA.localeCompare(labelB, 'es')
+    })
+  }
+
+  const known = preferredOrder.filter((cat) => categories.includes(cat))
+  const remaining = categories.filter((cat) => !preferredOrder.includes(cat))
+  return [...known, ...remaining]
 }
 
 export interface NumFieldConfig {
